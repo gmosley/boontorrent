@@ -61,17 +61,17 @@ while True:
     for alert in alerts:
         if type(alert) == libtorrent.dht_get_peers_alert:
             pass
-            print(u'<dht_get_peers> ' + colored('{}'.format(alert.info_hash), "blue"))
+            print(u'<dht_get_peers> ' + colored(u'{}'.format(alert.info_hash), "blue"))
             if (alert.info_hash not in seen):
                 handles.add(session.add_torrent(get_params_for_info_hash(alert.info_hash)))
                 seen.add(alert.info_hash)
         elif type(alert) == libtorrent.dht_announce_alert:
-            print(u'<dht_announce>' + colored(' {}:{} {}'.format(alert.ip, alert.port, alert.info_hash), "yellow"))
+            print(u'<dht_announce>' + colored(u' {}:{} {}'.format(alert.ip, alert.port, alert.info_hash), "yellow"))
             if (alert.info_hash not in seen):
                 handles.add(session.add_torrent(get_params_for_info_hash(alert.info_hash)))
                 seen.add(alert.info_hash)
         elif type(alert) != libtorrent.dht_outgoing_get_peers_alert:
-            print(u'<other> {}'.format(alert))
+            print(u'<other>' + colored(u' {}'.format(alert), "magenta"))
 
     print(u'<info> {} nodes in routing table, {} infohashes collected, retrieving {} metadata ({} retrieved)'
           .format(len(session.dht_state()['nodes']), len(seen), len(handles), meta_info_count))
@@ -81,8 +81,8 @@ while True:
         status = handle.status()
         if (status.has_metadata):
             info = handle.get_torrent_info()
-            print(u'<ut_metadata> '+ colored('{}'.format(info.name()), "orange"))
-            f = open(info.name() + '.torrent', 'wb')
+            print(u'<ut_metadata> '+ colored(u'{}'.format(info.name()), "green"))
+            f = open(info.name() + u'.torrent', 'wb')
             f.write(libtorrent.bencode(
                 libtorrent.create_torrent(info).generate()))
             f.close()
