@@ -7,11 +7,17 @@ seen = set()
 handles = set()
 meta_info_count = 0
 
-port = 40363
+# port = 40363
+port = 6881
 
 session = libtorrent.session()
 session.listen_on(port, port)
-session.set_alert_mask(libtorrent.alert.category_t.dht_notification | libtorrent.alert.category_t.error_notification)
+session.set_alert_mask(libtorrent.alert.category_t.dht_notification | libtorrent.alert.category_t.error_notification | libtorrent.alert.category_t.performance_warning)
+
+session_settings = session.settings()
+session_settings.connection_speed = 80
+session_settings.peer_connect_timeout = 5
+session.set_settings(session_settings)
 
 session.add_dht_router("router.utorrent.com", 6881)
 session.add_dht_router("router.bittorrent.com", 6881)
@@ -19,7 +25,10 @@ session.add_dht_router("dht.transmissionbt.com", 6881)
 
 # start with the default settings and make some modifications
 dht_settings = session.get_dht_settings()
-dht_settings.restrict_routing_ips = False
+dht_settings.dht_upload_rate_limit = 12000
+dht_settings.upload_rate_limit = 0
+dht_settings.download_rate_limit = 0
+dht_settings.restrict_routing_ips = True
 
 session.set_dht_settings(dht_settings)
 print('max_dht_items {}, max_torrents {}'.format(dht_settings.max_dht_items, dht_settings.max_torrents))
@@ -37,15 +46,20 @@ def get_params_for_info_hash(info_hash):
         'paused': False,
         'auto_managed': False,
         'upload_mode': True,
+        'file_priorities': [0] * 1000,
         'info_hash': info_hash.to_bytes()
     }
     return torrent_params
 
+state_str = ['queued', 'checking', 'downloading metadata',
+             'downloading', 'finished', 'seeding', 'allocating']
 
 while True:
+    time.sleep(1)
     alerts = session.pop_alerts()
     for alert in alerts:
         if type(alert) == libtorrent.dht_get_peers_alert:
+            pass
             print('<dht_get_peers> {}'.format(alert.info_hash))
             if (alert.info_hash not in seen):
                 handles.add(session.add_torrent(get_params_for_info_hash(alert.info_hash)))
@@ -58,13 +72,13 @@ while True:
         elif type(alert) != libtorrent.dht_outgoing_get_peers_alert:
             print('<other> {}'.format(alert))
 
-    time.sleep(1)
     print('<info> {} nodes in routing table, {} infohashes collected, retrieving {} metadata ({} retrieved)'
           .format(len(session.dht_state()['nodes']), len(seen), len(handles), meta_info_count))
 
     to_remove = set()
     for handle in handles:
-        if (handle.has_metadata()):
+        status = handle.status()
+        if (status.has_metadata):
             info = handle.get_torrent_info()
             print('<ut_metadata> {}'.format(info.name()))
             f = open(info.name() + '.torrent', 'wb')
@@ -72,7 +86,21 @@ while True:
                 libtorrent.create_torrent(info).generate()))
             f.close()
             meta_info_count += 1
+            # current_time = int(time.time())
+            # print('<metadata_stats> time={} prio={} ({} {})'
+            #       .format(current_time - handle.status().added_time, handle.status().queue_position, status.num_peers, status.list_peers))
             to_remove.add(handle)
+        # else:
+        #     pass
+            # print('{} - {} peers ({} connected), prio {}, {} {:2}%'
+            #       .format(status.info_hash, status.list_peers, status.num_peers, status.queue_position, state_str[status.state], status.progress * 100))
+        else:
+            current_time = int(time.time())
+            status = handle.status()
+            time_spent = current_time - status.added_time
+            if time_spent > 20:
+                # print('removing torrent')
+                to_remove.add(handle)
 
     for handle in to_remove:
         session.remove_torrent(handle)
