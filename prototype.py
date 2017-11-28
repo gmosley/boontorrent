@@ -1,10 +1,11 @@
 import libtorrent
 import time
-from collections import Counter
 import os
+import binascii
 
 seen = set()
 handles = set()
+meta_info_count = 0
 
 port = 40363
 
@@ -15,7 +16,18 @@ session.set_alert_mask(libtorrent.alert.category_t.dht_notification | libtorrent
 session.add_dht_router("router.utorrent.com", 6881)
 session.add_dht_router("router.bittorrent.com", 6881)
 session.add_dht_router("dht.transmissionbt.com", 6881)
+session.add_dht_router("dht.libtorrent.org", 25401)
 
+# start with the default settings and make some modifications
+dht_settings = session.get_dht_settings()
+dht_settings.aggressive_lookups = True
+dht_settings.extended_routing_table = True
+dht_settings.max_dht_items = 3000
+session.set_dht_settings(dht_settings)
+print('max_dht_items {}, max_torrents {}'.format(dht_settings.max_dht_items, dht_settings.max_torrents))
+
+
+print('starting dht with node id {}'.format(binascii.hexlify(session.dht_state()['node-id'])))
 session.start_dht()
 
 def get_params_for_info_hash(info_hash):
@@ -44,10 +56,12 @@ while True:
             if (alert.info_hash not in seen):
                 handles.add(session.add_torrent(get_params_for_info_hash(alert.info_hash)))
                 seen.add(alert.info_hash)
-        # elif type(alert) != libtorrent.dht_outgoing_get_peers_alert:
-        #     print('<other> {}'.format(alert))
+        elif type(alert) != libtorrent.dht_outgoing_get_peers_alert:
+            print('<other> {}'.format(alert))
 
     time.sleep(1)
+    print('<info> {} nodes in routing table, {} infohashes collected, retrieving {} metainfos ({} retrieved)'
+          .format(len(session.dht_state()['nodes']), len(seen), len(handles), meta_info_count))
 
     to_remove = set()
     for handle in handles:
@@ -58,45 +72,10 @@ while True:
             f.write(libtorrent.bencode(
                 libtorrent.create_torrent(info).generate()))
             f.close()
+            meta_info_count += 1
             to_remove.add(handle)
 
     for handle in to_remove:
         session.remove_torrent(handle)
 
     handles -= to_remove
-
-# info_hash = '1488d454915d860529903b61adb537012a0fe7c8'
-# magnet = "magnet:?xt=urn:btih:" + info_hash
-# print(magnet)
-# save_path = os.path.join(os.path.abspath(os.path.curdir), 'test.torrent')
-
-# torrent_params = {
-#     'save_path': save_path,
-#     'paused': False,
-#     # 'auto_managed': False,
-#     # 'upload_mode': True,
-#     'url': info_hash
-# }
-#
-# h = session.add_torrent(torrent_params)
-#
-# # while not t.has_metadata():
-# #     time.sleep(1)
-# s = h.status()
-# while (not s.is_seeding):
-#         s = h.status()
-#         print(session.pop_alert())
-#         state_str = ['queued', 'checking', 'downloading metadata', \
-#                 'downloading', 'finished', 'seeding', 'allocating']
-#         print '%.2f%% complete (down: %.1f kb/s up: %.1f kB/s peers: %d) %s' % \
-#                 (s.progress * 100, s.download_rate / 1000, s.upload_rate / 1000, \
-#                 s.num_peers, state_str[s.state])
-#
-#         time.sleep(1)
-#
-#
-#
-# info = t.get_torrent_info()
-# print(info)
-# session.remove_torrent(t)
-# session.pause()
