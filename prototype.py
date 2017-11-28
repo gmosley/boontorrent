@@ -16,19 +16,18 @@ session.set_alert_mask(libtorrent.alert.category_t.dht_notification | libtorrent
 session.add_dht_router("router.utorrent.com", 6881)
 session.add_dht_router("router.bittorrent.com", 6881)
 session.add_dht_router("dht.transmissionbt.com", 6881)
-session.add_dht_router("dht.libtorrent.org", 25401)
 
 # start with the default settings and make some modifications
 dht_settings = session.get_dht_settings()
-dht_settings.aggressive_lookups = True
-dht_settings.extended_routing_table = True
-dht_settings.max_dht_items = 3000
+dht_settings.restrict_routing_ips = False
+
 session.set_dht_settings(dht_settings)
 print('max_dht_items {}, max_torrents {}'.format(dht_settings.max_dht_items, dht_settings.max_torrents))
 
 
 print('starting dht with node id {}'.format(binascii.hexlify(session.dht_state()['node-id'])))
 session.start_dht()
+
 
 def get_params_for_info_hash(info_hash):
     save_path = os.path.join(os.path.abspath(os.path.curdir), str(info_hash) + '.torrent')
@@ -60,14 +59,14 @@ while True:
             print('<other> {}'.format(alert))
 
     time.sleep(1)
-    print('<info> {} nodes in routing table, {} infohashes collected, retrieving {} metainfos ({} retrieved)'
+    print('<info> {} nodes in routing table, {} infohashes collected, retrieving {} metadata ({} retrieved)'
           .format(len(session.dht_state()['nodes']), len(seen), len(handles), meta_info_count))
 
     to_remove = set()
     for handle in handles:
         if (handle.has_metadata()):
             info = handle.get_torrent_info()
-            print('<ut_metainfo> {}'.format(info.name()))
+            print('<ut_metadata> {}'.format(info.name()))
             f = open(info.name() + '.torrent', 'wb')
             f.write(libtorrent.bencode(
                 libtorrent.create_torrent(info).generate()))
