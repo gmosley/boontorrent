@@ -2,6 +2,7 @@ import libtorrent
 import time
 import os
 import binascii
+from termcolor import colored
 
 seen = set()
 handles = set()
@@ -61,16 +62,16 @@ while True:
         if type(alert) == libtorrent.dht_get_peers_alert:
             pass
             print('<dht_get_peers> {}'.format(alert.info_hash))
-            if (alert.info_hash not in seen):
+            if (alert.info_hash not in seen and len(handles) < 50):
                 handles.add(session.add_torrent(get_params_for_info_hash(alert.info_hash)))
                 seen.add(alert.info_hash)
         elif type(alert) == libtorrent.dht_announce_alert:
             print('<dht_announce> {}:{} {}'.format(alert.ip, alert.port, alert.info_hash))
-            if (alert.info_hash not in seen):
+            if (alert.info_hash not in seen and len(handles) < 50):
                 handles.add(session.add_torrent(get_params_for_info_hash(alert.info_hash)))
                 seen.add(alert.info_hash)
-        elif type(alert) != libtorrent.dht_outgoing_get_peers_alert:
-            print('<other> {}'.format(alert))
+        # elif type(alert) != libtorrent.dht_outgoing_get_peers_alert:
+        #     print('<other> {}'.format(alert))
 
     print('<info> {} nodes in routing table, {} infohashes collected, retrieving {} metadata ({} retrieved)'
           .format(len(session.dht_state()['nodes']), len(seen), len(handles), meta_info_count))
@@ -80,7 +81,7 @@ while True:
         status = handle.status()
         if (status.has_metadata):
             info = handle.get_torrent_info()
-            print('<ut_metadata> {}'.format(info.name()))
+            print('<ut_metadata> {}'.format(colored(unicode(info.name()), "green")))
             f = open(info.name() + '.torrent', 'wb')
             f.write(libtorrent.bencode(
                 libtorrent.create_torrent(info).generate()))
