@@ -1,8 +1,13 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
 import libtorrent
 import time
 import os
 import binascii
 from termcolor import colored
+
+
 
 seen = set()
 handles = set()
@@ -81,8 +86,8 @@ while True:
         status = handle.status()
         if (status.has_metadata):
             info = handle.get_torrent_info()
-            print(u'<ut_metadata> '+ colored(u'{}'.format(info.name()), "green"))
-            f = open(info.name() + u'.torrent', 'wb')
+            print('<ut_metadata> '+ colored('{}'.format(info.name().decode("utf-8", "ignore")), "green"))
+            f = open(info.name().decode("utf-8", "ignore") + '.torrent', 'wb')
             f.write(libtorrent.bencode(
                 libtorrent.create_torrent(info).generate()))
             f.close()
@@ -99,7 +104,7 @@ while True:
             current_time = int(time.time())
             status = handle.status()
             time_spent = current_time - status.added_time
-            if time_spent > 20:
+            if time_spent > 30:
                 # print('removing torrent')
                 to_remove.add(handle)
 
