@@ -5,6 +5,7 @@ import os
 import binascii
 from termcolor import colored
 
+print('boontorrent started')
 
 # we can view default settings with lt.default_settings()
 
@@ -59,11 +60,13 @@ session.set_dht_settings(dht_settings)
 #       field from lt.session_stats_metrics()
 
 for alert in session.pop_alerts():
-    if type(alert) == lt.log_alert:
-        continue
+    # if type(alert) == lt.log_alert:
+    #     continue
     
     print('alert: ' + alert.what())
     print(alert.message())
+
+time.sleep(2)
 
 initial_state = session.save_state()
 dht_node_id = initial_state[b'dht state'][b'node-id']
