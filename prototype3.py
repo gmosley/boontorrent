@@ -13,11 +13,17 @@ alert_mask = (
     lt.alert.category_t.error_notification |
     lt.alert.category_t.performance_warning |
     lt.alert.category_t.stats_notification
-    # lt.alert.category_t.dht_operation_notification (low level operations)
+    # lt.alert.category_t.dht_operation_notification
 )
 
+# other DHT routers:
+#  router.utorrent.com:6881
+#  router.bittorrent.com:6881
+#  dht.transmissionbt.com:6881
+#  dht.libtorrent.org:25401
+
 session_settings = {
-    'listen_interfaces': '0.0.0.0:40363',
+    'listen_interfaces': '0.0.0.0:40363', # port 40363 is for Graham's VPN.
     'alert_mask': alert_mask,
     'dht_bootstrap_nodes': 'router.utorrent.com:6881'
 }
@@ -25,11 +31,8 @@ session_settings = {
 session = lt.session(session_settings)
 # TODO: is there a way to create a paused session so we can change dht settings
 #       before starting?
+# gmosley: see https://www.libtorrent.org/reference-Core.html#set_dht_storage()
 session.pause()
-
-# session.add_dht_router("router.utorrent.com", 6881)
-# session.add_dht_router("router.bittorrent.com", 6881)
-# session.add_dht_router("dht.transmissionbt.com", 6881)
 
 # TODO: re-read documentation and make sure these settings are correct
 # session_settings = session.settings()
@@ -39,8 +42,12 @@ session.pause()
 
 # start with the default settings and make some modifications
 dht_settings = session.get_dht_settings()
+# pprint(dir(dht_settings))
+# pprint(dht_settings.aggressive_lookups)
+# pprint(dht_settings.max_peers)
+# pprint(dht_settings.extended_routing_table)
 
-# TODO: rer-read documentation and make sure these settings are correct
+# TODO: re-read documentation and make sure these settings are correct
 dht_settings.dht_upload_rate_limit = 12000
 dht_settings.upload_rate_limit = 0
 dht_settings.download_rate_limit = 0
@@ -112,7 +119,7 @@ while True:
         status = handle.status()
         if (status.has_metadata):
             metadata = status.torrent_file
-            print('<ut_metadata> {}'.format(metadata.name()))
+            print('<ut_metadata> {} ({})'.format(metadata.name(), handle.info_hash()))
             with open(metadata.name() + '.torrent', 'wb') as f:
                 f.write(lt.bencode(lt.create_torrent(metadata).generate()))
             meta_info_count += 1
