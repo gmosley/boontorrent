@@ -10,6 +10,7 @@ RUN pip3 install termcolor
 
 ADD prototype3.py .
 
-EXPOSE 40363
+EXPOSE 40363/tcp
+EXPOSE 40363/udp
 
-RUN ["python3", "prototype3.py"]
+ENTRYPOINT ["python3", "prototype3.py"]
