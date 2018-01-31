@@ -59,17 +59,17 @@ session.set_dht_settings(dht_settings)
 #       field from lt.session_stats_metrics()
 
 for alert in session.pop_alerts():
-    if type(alert) == lt.log_alert:
-        continue
+#    if type(alert) == lt.log_alert:
+#        continue
     
-    print('alert: ' + alert.what())
-    print(alert.message())
+    print('alert: ' + alert.what(), flush=True)
+    print(alert.message(), flush=True)
 
 initial_state = session.save_state()
-dht_node_id = initial_state[b'dht state'][b'node-id']
-print('dht node id {}'.format(binascii.hexlify(dht_node_id).decode()))
-print('max_dht_items {}, max_torrents {}'.format(
-    dht_settings.max_dht_items, dht_settings.max_torrents))
+#dht_node_id = initial_state[b'dht state'][b'node-id']
+#print('dht node id {}'.format(binascii.hexlify(dht_node_id).decode()))
+#print('max_dht_items {}, max_torrents {}'.format(
+#    dht_settings.max_dht_items, dht_settings.max_torrents))
 
 def get_params_for_info_hash(info_hash):
     save_path = os.path.join(
@@ -102,12 +102,12 @@ state_str = ['queued', 'checking', 'downloading metadata',
              'downloading', 'finished', 'seeding', 'allocating']
 
 while True:
-    print('checking for alerts')
+    print('checking for alerts', flush=True)
     alerts = session.pop_alerts()
     for alert in alerts:
-        print('({}) {}'.format(alert.what(), alert.message()))
+        print('({}) {}'.format(alert.what(), alert.message()), flush=True)
         if type(alert) == lt.portmap_error_alert:
-            print(alert.message())
+            print(alert.message(), flush=True)
         elif (type(alert) in [lt.dht_announce_alert, lt.dht_get_peers_alert]) and alert.info_hash not in seen:
             seen.add(alert.info_hash)
             torrent_params = get_params_for_info_hash(alert.info_hash)
@@ -119,14 +119,14 @@ while True:
         status = handle.status()
         if (status.has_metadata):
             metadata = status.torrent_file
-            print('<ut_metadata> {} ({})'.format(metadata.name(), handle.info_hash()))
+            print('<ut_metadata> {} ({})'.format(metadata.name(), handle.info_hash()), flush=True)
             with open(metadata.name() + '.torrent', 'wb') as f:
                 f.write(lt.bencode(lt.create_torrent(metadata).generate()))
             meta_info_count += 1
             to_remove.add(handle)
         else:
             print('{} - {} peers ({} connected), prio {}, {} {:2}%'
-                  .format(status.info_hash, status.list_peers, status.num_peers, status.queue_position, state_str[status.state], status.progress * 100))
+                  .format(status.info_hash, status.list_peers, status.num_peers, status.queue_position, state_str[status.state], status.progress * 100), flush=True)
 
     for handle in to_remove:
         session.remove_torrent(handle)
