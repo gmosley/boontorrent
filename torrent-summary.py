@@ -35,7 +35,10 @@ for torrent_file in torrent_path.iterdir():
         if b'length' in info:
             num_files = 1
             size = info[b'length']
-            print('  {}'.format(info[b'name'].decode()))
+            print('  {} - {}'.format(
+                info[b'name'].decode(),
+                human_readable_size(size))
+            )
         else:
             num_files = 0
             for f in info[b'files']:
