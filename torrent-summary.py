@@ -60,7 +60,9 @@ if __name__ == '__main__':
     
     for arg in sys.argv[1:]:
         p = Path(arg)
-        if p.is_dir():
+        if not p.exists():
+            print('{} not found'.format(p))
+        elif p.is_dir():
             for torrent_file in p.iterdir():
                 if torrent_file.name.endswith('.torrent'):
                     summarize_torrent(torrent_file)
