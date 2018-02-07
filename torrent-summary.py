@@ -1,8 +1,8 @@
 from pathlib import Path
 from pprint import pprint
 import libtorrent as lt
+import sys
 
-torrent_path = Path('torrents/')
 
 def human_readable_size(size, decimal_places=2):
     for unit in ['B','KB','MB','GB','TB']:
@@ -14,10 +14,9 @@ def human_readable_size(size, decimal_places=2):
 def human_path(path):
     return '/'.join([f.decode(errors='ignore') for f in path])
 
-for torrent_file in torrent_path.iterdir():
-    if not torrent_file.name.endswith('.torrent'): continue
-    with torrent_file.open('rb') as f:
-        print(torrent_file)
+def summarize_torrent(torrent_file):
+    print(torrent_file)
+    with open(torrent_file, 'rb') as f:
         torrent = lt.bdecode(f.read())
 
         info = torrent[b'info']
@@ -52,3 +51,19 @@ for torrent_file in torrent_path.iterdir():
 
         # print('{} - {} ({})'.format(
         #     torrent_name, human_readable_size(size), num_files))
+
+if __name__ == '__main__':
+    print
+    if len(sys.argv) < 2:
+        print('usage python3 torrent-summary.py <torrent(s)>')
+        exit(1)
+    
+    for arg in sys.argv[1:]:
+        p = Path(arg)
+        if p.is_dir():
+            for torrent_file in p.iterdir():
+                if torrent_file.name.endswith('.torrent'):
+                    summarize_torrent(torrent_file)
+        else:
+            summarize_torrent(p)
+    
