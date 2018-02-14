@@ -14,6 +14,20 @@ def human_readable_size(size, decimal_places=2):
 def human_path(path):
     return '/'.join([f.decode(errors='ignore') for f in path])
 
+def classify(torrent_file):
+    infohash = torrent_file.name.split('.')[0]
+    print()
+    print(infohash)
+    summarize_torrent(torrent_file)
+    result = input('[y/n/q]')
+    if result == 'q':
+        exit()
+
+    label = 1 if result == 'y' else 0
+
+    with open('classify.txt', 'a') as f:
+        f.write('{} {}\n'.format(infohash, label))
+
 def summarize_torrent(torrent_file):
     print(torrent_file)
     with open(torrent_file, 'rb') as f:
@@ -65,7 +79,8 @@ if __name__ == '__main__':
         elif p.is_dir():
             for torrent_file in p.iterdir():
                 if torrent_file.name.endswith('.torrent'):
-                    summarize_torrent(torrent_file)
+                    # summarize_torrent(torrent_file)
+                    classify(torrent_file)
         else:
             summarize_torrent(p)
     
