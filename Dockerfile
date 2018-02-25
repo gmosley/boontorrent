@@ -1,16 +1,20 @@
-FROM ubuntu:17.10
+FROM openjdk:8 
+
 
 RUN apt-get update && apt-get install -y \
   git \
-  python3 \
-  python3-pip \
-  python3-libtorrent
+  maven 
 
-RUN pip3 install termcolor
+RUN git clone https://github.com/dylanmann/mldht.git
 
-ADD prototype3.py .
+WORKDIR mldht
 
-EXPOSE 40363/tcp
-EXPOSE 40363/udp
+RUN mvn package dependency:copy-dependencies appassembler:assemble && \
+    mvn antrun:run
 
-ENTRYPOINT ["python3", "prototype3.py"]
+WORKDIR work
+
+EXPOSE 10044/tcp
+EXPOSE 10044/udp
+
+ENTRYPOINT ["../bin/mldht"] 
