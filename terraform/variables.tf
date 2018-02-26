@@ -9,14 +9,10 @@ variable "ecs_cluster_name" {
     default = "boontorrent-cluster"
 }
 
-variable "amis" {
-    description = "Which AMI to spawn. Defaults to the AWS ECS optimized images."
-    # TODO: support other regions.
-    default = {
-        us-east-1 = "ami-ddc7b6b7"
-    }
+variable "num_nodes" {
+    default = "5"
+    description = "Number of EC2 nodes to run in the cluster"
 }
-
 
 variable "autoscale_min" {
     default = "1"

@@ -1,5 +1,6 @@
 # don't commit AWS keys
 terraform/keys.tf
+terraform/.terraform/
 
 # don't commit torrent files
 *.torrent
