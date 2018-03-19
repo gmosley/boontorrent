@@ -16,11 +16,17 @@ object SimpleApp {
     val count = logData.count()
     println(s"Number of records: $count")
 
+    val locationDF = logData.filter(col("location.country").isNotNull)
 
-    logData.filter(col("location.country").isNotNull)
-      .groupBy("location.country")
+    locationDF.groupBy("location.country")
       .count().sort(desc("count"))
       .show(20)
+
+    locationDF.filter("location.country_iso = 'US'")
+      .groupBy("location.city", "location.subdivision",)
+      .count().sort(desc("count"))
+      .show(20)
+
     logData.groupBy("type").count().show()
 
     spark.stop()
