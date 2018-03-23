@@ -13,4 +13,5 @@ mvn package dependency:copy-dependencies appassembler:assemble && mvn antrun:run
 
 # run daemon as root
 cd work
-(../bin/mldht 0<&- &> out.log &) & 
+sleep 10
+(../bin/mldht 0<&- > out.log &) & 
