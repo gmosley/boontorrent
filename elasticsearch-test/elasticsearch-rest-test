@@ -1,0 +1,44 @@
+DELETE torrents
+
+PUT torrents
+{
+  "settings": {
+    "analysis": {
+      "analyzer": {
+        "torrent_name_analyzer": {
+          "char_filter": "torrent_char_filter",
+          "tokenizer": "standard",
+          "filter": ["lowercase"]
+        }
+      }, 
+      "char_filter": {
+        "torrent_char_filter": {
+          "type": "mapping",
+          "mappings": [
+            ". => \\u0020"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "_doc": {
+      "properties": {
+        "name": { 
+          "type": "text",
+          "analyzer": "torrent_name_analyzer"
+        }
+      }
+    }
+  }
+}
+
+GET torrents/_analyze
+{
+  "analyzer": "torrent_name_analyzer", 
+  "text": "[www.dydao.com]Pulp.Fiction.1994.BluRay.720p.x264.DTS-WiKi"
+}
+
+GET torrents/_doc/9C28F9D17E1A6655C90138749DF11CDD1CEEB1B6
+
+GET /torrents/_search?q=name:"Mr. Robot"
