@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Make sure that we clone/run as ubuntu
-su ubuntu
+su ec2-user
 cd ~
 
 # install dependencies
