@@ -5,6 +5,8 @@ su ubuntu
 cd ~
 
 # install dependencies
+echo 'Acquire::ForceIPv4 "true";' | sudo tee /etc/apt/apt.conf.d/99force-ipv4
+sudo apt update
 sudo apt install -y make htop openjdk-8-jdk maven
 
 # get the geocity database
