@@ -8,7 +8,7 @@ cd ~
 echo 'Acquire::ForceIPv4 "true";' | sudo tee /etc/apt/apt.conf.d/99force-ipv4
 sudo apt update
 sudo apt upgrade
-sudo apt install make htop openjdk-8-jdk maven
+sudo apt install -y make htop openjdk-8-jdk maven
 
 # get the geocity database
 wget http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.tar.gz
