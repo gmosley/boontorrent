@@ -24,6 +24,9 @@
         "name": { 
           "type": "text",
           "analyzer": "torrent_name_analyzer"
+        },
+        "location": {
+          "type": "geo_point"
         }
       }
     }

@@ -14,6 +14,15 @@ es.indices.create(
     body=json.load(open('schema.json'))
 )
 
+def parse_lat_lon(r):
+    if 'location' in r['peers'][0]:
+        location = r['peers'][0]['location']
+        if 'latitude' in location and 'longitude' in location:
+            return {
+                'lat': location['latitude'],
+                'lon': location['longitude']
+            }
+
 for data_file in data_files:
     print(data_file)
     with open(data_file, 'r') as f:
@@ -26,4 +35,8 @@ for data_file in data_files:
                     'files': r['files'],
                     'size': r['size']
                 }
+                loc = parse_lat_lon(r)
+                if loc:
+                    body['location'] = loc
+
                 es.index(index='torrents', doc_type='_doc', id=r['infohash'], body=body)
