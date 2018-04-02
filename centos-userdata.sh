@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # Make sure that we clone/run as ubuntu
-su ubuntu
+su ec2-user
 cd ~
 
 # install dependencies
-echo 'Acquire::ForceIPv4 "true";' | sudo tee /etc/apt/apt.conf.d/99force-ipv4
-sudo apt update
-sudo apt install -y make htop openjdk-8-jdk maven
+sudo wget http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo -O /etc/yum.repos.d/epel-apache-maven.repo
+sudo sed -i s/\$releasever/6/g /etc/yum.repos.d/epel-apache-maven.repo
+sudo yum install -y make htop java-1.8.0-openjdk-devel apache-maven
 
 # get the geocity database
 wget http://geolite.maxmind.com/download/geoip/database/GeoLite2-City.tar.gz
