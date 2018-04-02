@@ -5,8 +5,6 @@ su ubuntu
 cd ~
 
 # install dependencies
-sudo apt update
-sudo apt -y upgrade
 sudo apt install -y make htop openjdk-8-jdk maven
 
 # get the geocity database
