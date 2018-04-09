@@ -1,13 +1,15 @@
 import json
 from pathlib import Path
 from elasticsearch import Elasticsearch
+from elasticsearch.helpers import streaming_bulk
 
-data_path = Path('2018/03/22')
-data_files = [x for x in data_path.glob('**/*') if x.is_file()]
+
+data_path = Path('2018')
+data_files = (x for x in data_path.glob('**/*') if x.is_file())
 
 es = Elasticsearch()
 
-es.indices.delete(index='torrents', ignore=[404])
+es.indices.delete(index='torrents', ignore=[404]) #pylint: disable=E1123
 
 es.indices.create(
     index='torrents',
@@ -23,12 +25,15 @@ def parse_lat_lon(r):
                 'lon': location['longitude']
             }
 
-for data_file in data_files:
-    print(data_file)
-    with open(data_file, 'r') as f:
-        for line in f:
-            r = json.loads(line)
-            if r['type'] == 'resolve' and 'name' in r:
+
+def data_iterable():
+    for data_file in data_files:
+        with open(data_file, 'r') as f:
+            for line in f:
+                r = json.loads(line)
+                if r['type'] != 'resolve' or 'name' not in r:
+                    continue
+
                 body = {
                     'name': r['name'],
                     'infohash': r['infohash'],
@@ -38,5 +43,24 @@ for data_file in data_files:
                 loc = parse_lat_lon(r)
                 if loc:
                     body['location'] = loc
+                yield {
+                    '_op_type': 'index',
+                    '_index': 'torrents',
+                    '_type': '_doc',
+                    '_id': r['infohash'],
+                    '_source': body
+                }
 
-                es.index(index='torrents', doc_type='_doc', id=r['infohash'], body=body)
+failed = 0
+success = 0
+
+for ok, item in streaming_bulk(es, data_iterable(), chunk_size=500, max_retries=2):
+    # go through request-reponse pairs and detect failures
+    if not ok:
+        failed += 1
+    else:
+        success += 1
+
+print("DONE")
+print("failed", failed)
+print("success", success)
