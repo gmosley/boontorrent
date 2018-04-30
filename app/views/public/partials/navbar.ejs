@@ -1,0 +1,60 @@
+<html>
+
+<head>
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.9/css/all.css" integrity="sha384-5SOiIsAziJl6AWe0HWRKTXlfcSHKmYV4RBF18PPJ173Kzn7jzMyFuTtk8JA7QQG1"
+    crossorigin="anonymous">
+
+    <script>
+        $(document).ready(function () {
+            $('[data-toggle="popover"]').popover();
+        });
+    </script>
+    <style>
+        .popover-title {
+            color: blue;
+            font-size: 15px;
+        }
+        .popover-content {
+            color: red;
+            font-size: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container-fluid">
+        <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-dark">
+            <a class="navbar-brand" href="/" style="color:#ffd941">
+                BOONTORRENT
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
+                    <!-- <li class="nav-item active">
+                        <a class="nav-link pr-3" href="/howitworks" style="color:#D3D3D3">How it Works</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link pr-3" href="#" style="color:#D3D3D3">Getting Started</a>
+                    </li> -->
+                </ul>
+                <form class="form-inline my-2 my-lg-0" action="/search" method="GET">
+                    <input name="q" class="form-control mr-sm-2" type="search" placeholder="Search for torrents" aria-label="Search">
+                    <div class="form-group">
+                        <button class="btn btn-outline-warning my-2 my-sm-0" type="submit" style="color:#ffd941"><i class="fas fa-search"></i>&nbsp;Search</button>
+                    </div>
+                </form>
+            </div>
+        </nav>
+    </div>
+     <!-- jQuery first, then Bootstrap JS. -->
+     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js"></script>
+     <script src="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/js/bootstrap.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        html,
+        body{
+            padding: 40px;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        #map{
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* to resolve flickering bug */
+        svg > g > g:last-child { pointer-events: none }
+    </style>
+    <title>
+        <%= title %>
+    </title>
+    <%
+            var humanFileSize = function(bytes, si) {
+                var thresh = si ? 1000 : 1024;
+                if (Math.abs(bytes) < thresh) {
+                    return bytes + ' B';
+                }
+                var units = si
+                    ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+                    : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+                var u = -1;
+                do {
+                    bytes /= thresh;
+                    ++u;
+                } while (Math.abs(bytes) >= thresh && u < units.length - 1);
+                return bytes.toFixed(1) + ' ' + units[u];
+            }
+        %>
+    <!-- <link rel="stylesheet" type="text/css" href="/public/stylesheets/search.css"> -->
+    <script>
+    var humanFileSize = function (bytes, si) {
+            var thresh = si ? 1000 : 1024;
+            if (Math.abs(bytes) < thresh) {
+                return bytes + ' B';
+            }
+            var units = si
+                ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+                : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+            var u = -1;
+            do {
+                bytes /= thresh;
+                ++u;
+            } while (Math.abs(bytes) >= thresh && u < units.length - 1);
+            return bytes.toFixed(1) + ' ' + units[u];
+        }
+
+    var map;
+    var hit_data = <%- JSON.stringify(hits) %>;
+    var markers = [];
+    var country_counter = {};
+    var city_counter = {};
+    var country_element = {};
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: 30, lng: 0 },
+        zoom: 2,
+        minZoom: 2,
+        mapTypeId: google.maps.MapTypeId.ROADMAP,
+      });
+
+      makeMap(hit_data);
+    };
+
+    function makeMap(data) {
+        for (var i = 0; i < data.length; i++){
+
+            if (data[i]._source.location.lat != null & 
+                data[i]._source.location.lon != null & 
+                data[i]._source.name != null &
+                data[i]._source.name != null){
+
+                var mark = new google.maps.Marker({
+                    position: {lat: Number(data[i]._source.location.lat), lng: Number(data[i]._source.location.lon)},
+                    map: map,
+                    title: data[i]._source.name, 
+                });
+
+                mark.setMap(map);
+                markers.push(mark);
+                if (data[i]._source.city != null & 
+                    data[i]._source.subdivision != null & 
+                    data[i]._source.country != null &
+                    data[i]._source.size != null &
+                    data[i]._source.files){
+
+                    var contentstring = '<div id="content">' +
+                                        '<b>' + String(data[i]._source.name) + '<b>' +  
+                                        '<p class="text-muted">' + String(data[i]._source.city) + ', ' + String(data[i]._source.subdivision) + '</p>' + 
+                                        '<p class="text-muted">' + String(data[i]._source.country) + '</p>' + 
+                                        '<p class="text-muted">Size: ' + String(humanFileSize(data[i]._source.size, false)) + '</p>' + 
+                                        '<p class="text-muted">Number of files: ' + String(data[i]._source.files) + '</p>' + 
+                                        '</div>';
+
+                    var infowindow = new google.maps.InfoWindow({
+                        content: contentstring,
+                        position: {lat: Number(data[i]._source.location.lat), lng: Number(data[i]._source.location.lon)},
+                    });
+            
+                    google.maps.event.addListener(mark, 'click', (function(marker, infowindow){
+                        return function() {
+                            infowindow.open(map,this);
+                        };
+                    })(mark, infowindow));
+                }
+            }
+        }
+    }
+
+    google.charts.load('current', {'packages':['corechart']});
+    google.charts.setOnLoadCallback(drawChart);
+
+    function drawChart() {
+        makeChartData(hit_data);
+        
+        var country_data = [];
+        var city_data = [];
+        for (var country in country_counter) {
+            country_data.push([country, country_counter[country]]);
+        }
+        for (var city in city_counter) {
+            city_data.push([city, city_counter[city]]);
+        }
+    
+        country_data.sort(function (a, b) {
+            return b[1] - a[1];
+        });
+        city_data.sort(function (a, b) {
+            return b[1] - a[1];
+        });
+
+        // calculate how much the 'other' group is
+        if (country_data.length > 9) {
+            var count = 0;
+            for (let i = 9; i < country_data.length; i++) {
+                count += country_data[i][1];
+            }
+            while (country_data.length > 9) {
+                country_data.pop();
+            }
+            country_data.push(['Others', count]);
+        }
+        country_data.unshift(["Country", "Torrents Resolved"]);
+
+        if (city_data.length > 9) {
+            var count = 0;
+            for (let i = 9; i < city_data.length; i++) {
+                count += city_data[i][1];
+            }
+            while (city_data.length > 9) {
+                city_data.pop();
+            }
+            city_data.push(['Others', count]);
+        }
+        city_data.unshift(["City", "Torrents Resolved"]);
+
+        var country_table = google.visualization.arrayToDataTable(country_data);
+        var city_table = google.visualization.arrayToDataTable(city_data);
+
+        var country_chart_options = {
+            legend: 'none',
+            title: 'Country Distribution',
+            fontSize: 20,
+            chartArea: {left:0, 'width': '100%', 'height': '80%'},
+        };
+        var city_chart_options = {
+            legend: 'none',
+            title: 'City Distribution',
+            fontSize: 20,
+            chartArea: { left: 0, 'width': '100%', 'height': '80%' },
+        };
+        var chart1 = new google.visualization.PieChart(document.getElementById('diechart'));
+        var chart2 = new google.visualization.PieChart(document.getElementById('piechart'));
+
+        chart1.draw(country_table, country_chart_options);
+        chart2.draw(city_table, city_chart_options);
+      }
+
+    function makeChartData(data){
+        for (var i = 0; i < data.length; i++){
+            var country = data[i]._source.country;
+            var city = data[i]._source.city;
+            if (country != null){
+                if (!country_counter[country]){
+                    country_counter[country] = 0;
+                }
+                country_counter[country] += 1;
+            }
+
+            if (city != null) {
+                if (!city_counter[city]) {
+                    city_counter[city] = 0;
+                }
+                city_counter[city] += 1;
+            }
+        }
+    }
+    
+    </script>
+
+  </script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAWU8U34ECkVyzSAXlCUpj7aire06pqY5Q&libraries=visualization&callback=initMap" async
+    defer>
+    </script>
+</head>
+
+<body>
+    <% include ../views/public/partials/navbar %>
+    <div class="container-fluid" style="padding-bottom: 50px;">
+        <div class="row">
+            <h1><%= numhits %> results found for "<%= querystring %>" (<%= (time/1000).toFixed(3) %> seconds)</h1>
+        </div>
+        <div class="row" style="margin-bottom: 0px;">
+            <div class="container-fluid rounded-top" id="map" style="height:350px;" ></div>
+        </div>
+        <div class="row rounded-bottom border"  style="margin-top: 0px; margin-bottom: 20px; height: 350px;">
+            <div class="col-md-6">
+                <div id="piechart" style="height: 100%;"></div>
+            </div>
+            <div class="col-md-6">
+                <div id="diechart" style="height: 100%;"></div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="list-group w-100">
+                <% for(var i=0; i<hits.length; i++) { %>
+                    <a href="/torrent/<%= hits[i]._source.infohash %>" class="list-group-item list-group-item-action flex-column align-items-start">
+                        <div class="d-flex justify-content-between">
+                            <h5 class="mb-1"><%= hits[i]._source.name %></h5>
+                            <small><%= (100 * hits[i]._score / max_score).toFixed(0) %>%</small>
+                        </div>
+                        <small>
+                            INFOHASH: <%= hits[i]._source.infohash %><br>
+                            <%= hits[i]._source.files %> files, <%= humanFileSize(hits[i]._source.size, true) %><br>
+                            Crawled on: <%= (new Date(hits[i]._source.timestamp)).toLocaleString('en-US') %>
+                        </small>
+
+                    </a>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

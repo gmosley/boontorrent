@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.9/css/all.css" integrity="sha384-5SOiIsAziJl6AWe0HWRKTXlfcSHKmYV4RBF18PPJ173Kzn7jzMyFuTtk8JA7QQG1"
+        crossorigin="anonymous">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        html,
+        body {
+            padding: 40px;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    <title>
+        <%= data.name %> - Boontorrent
+    </title>
+
+    <%
+        var humanFileSize = function(bytes, si) {
+            var thresh = si ? 1000 : 1024;
+            if (Math.abs(bytes) < thresh) {
+                return bytes + ' B';
+            }
+            var units = si
+                ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+                : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+            var u = -1;
+            do {
+                bytes /= thresh;
+                ++u;
+            } while (Math.abs(bytes) >= thresh && u < units.length - 1);
+            return bytes.toFixed(1) + ' ' + units[u];
+        }
+
+        var fileType = function(filename) {
+            // get extension
+            var splits = filename.split('.');
+            if (splits.length < 2) {
+                return 'fa-file-alt';
+            }
+            
+            // 0 - image
+            // 1 - video
+            // 2 - audio 
+            // 3 - ebook
+            // 4 - archive 
+            // 5 - pdf
+            var icons = [
+                'fa-file-image',
+                'fa-file-video',
+                'fa-file-audio',
+                'fa-book',
+                'fa-file-archive',
+                'fa-file-pdf'
+            ];
+            var types = [
+                ['ANI', 'BMP', 'CAL', 'FAX', 'GIF', 'IMG', 'JBG', 'JPE', 'JPEG', 'JPG', 'MAC', 'PBM', 'PCD', 'PCX', 'PCT', 'PGM', 'PNG', 'PPM', 'PSD', 'RAS', 'TGA', 'TIFF', 'WMF'],
+                ['MOV', 'MPEG4', 'MP4', 'AVI', 'WMV', 'MPEGPS', 'FLV', 'MKV', 'M4V'],
+                ['AIFF', 'M4A', 'M4B', 'M4P', 'MMF', 'MP3', 'RAW', 'WAV', 'WMA', 'WEBM'],
+                ['EPUB', 'PDB', 'IBOOK', 'MOBI', 'INF', 'AZW', 'AZW3', 'KF8', 'KFX', 'PRC', 'OPF'],
+                ['ISO', 'TAR', 'GZ', '7Z', 'APK', 'DMG', 'JAR', 'RAR', 'TGZ', 'TXZ'],
+                ['PDF']
+            ];
+            var ext = splits.pop().toUpperCase();
+            for (let i = 0; i < types.length; i++) {
+                for (let j = 0; j < types[i].length; j++) {
+                    if (ext == types[i][j]) {
+                        return icons[i];
+                    }
+                }
+            }
+            return 'fa-file-alt';
+        }
+    %>
+</head>
+
+<body>
+    <% include ../views/public/partials/navbar %>
+        <div class="container-fluid">
+            <div class="row">
+                <h1><%= data.name %></h1>
+            </div>
+            <div class="row">
+                <h3><%= data.infohash %></h3>
+            </div>
+            <div class="row" style="padding-bottom: 20px;">
+                <h4><%= data.num_files%> file(s)
+                    (<%= humanFileSize(data.size, true) %>)</h4>
+            </div>
+            <% if (data.files) { %>
+                <ul class="list-group">
+                <% for(var i=0; i<data.files.length; i++) {%>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span><i class="text-info fas <%= fileType(data.files[i].path.join("/")) %>"></i>&nbsp;<%= data.files[i].path.join("/") %></span>
+                            <span class="badge badge-pill badge-light"><%= humanFileSize(data.files[i].size, true) %></span>
+                        </li>
+                <% } %>
+                </ul>
+            <% } %>
+        </div>
+</body>
+
+</html>

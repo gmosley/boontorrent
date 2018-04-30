@@ -1,0 +1,48 @@
+{
+    "took": 45,
+    "timed_out": false,
+    "_shards": {
+        "total": 5,
+        "successful": 5,
+        "skipped": 0,
+        "failed": 0
+    },
+    "hits": {
+        "total": 245,
+        "max_score": 19.844479,
+        "hits": [
+            {
+                "_index": "torrents",
+                "_type": "_doc",
+                "_id": "DF549A76986C54053378FD6773C2A696449308D9",
+                "_score": 19.844479,
+                "_source": {
+                    "name": "Game of Thrones",
+                    "infohash": "DF549A76986C54053378FD6773C2A696449308D9",
+                    "files": 60,
+                    "size": 47498926080,
+                    "location": {
+                        "lat": 56.175,
+                        "lon": 47.2864
+                    }
+                }
+            },
+            {
+                "_index": "torrents",
+                "_type": "_doc",
+                "_id": "2145FF0D3C45192905E54135F5E42E01206995D1",
+                "_score": 19.503422,
+                "_source": {
+                    "name": "Game of Thrones",
+                    "infohash": "2145FF0D3C45192905E54135F5E42E01206995D1",
+                    "files": 67,
+                    "size": 53880322048,
+                    "location": {
+                        "lat": 45.0488,
+                        "lon": 38.9725
+                    }
+                }
+            }
+        ]
+    }
+}

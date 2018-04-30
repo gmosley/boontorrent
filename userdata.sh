@@ -1,4 +1,8 @@
 #!/bin/bash
+# The userdata of each crawler node is
+  # #! /bin/bash
+  # wget -O - https://raw.githubusercontent.com/gmosley/boontorrent/master/userdata.sh | bash
+# This ensures that our deployment process is uniform
 
 # Make sure that we clone/run as ubuntu
 su ubuntu

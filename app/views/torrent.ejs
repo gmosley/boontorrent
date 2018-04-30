@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+        crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+        crossorigin="anonymous">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        html,
+        body {
+            padding: 40px;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    <title>
+        <%= title %>
+    </title>
+    <%
+        var humanFileSize = function(bytes, si) {
+            var thresh = si ? 1000 : 1024;
+            if (Math.abs(bytes) < thresh) {
+                return bytes + ' B';
+            }
+            var units = si
+                ? ['kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+                : ['KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB', 'ZiB', 'YiB'];
+            var u = -1;
+            do {
+                bytes /= thresh;
+                ++u;
+            } while (Math.abs(bytes) >= thresh && u < units.length - 1);
+            return bytes.toFixed(1) + ' ' + units[u];
+        }
+    %>
+    <link rel="stylesheet" type="text/css" href="/public/stylesheets/search.css">
+</head>
+
+<body>
+    <% include ../views/public/partials/navbar %>
+        <div class="container-fluid">
+            <div class="row">
+                <h1><%= torrent_data.name %></h1>
+            </div>
+            <div class="row">
+                <h3><%= torrent_data.infohash %></h3>
+            </div>
+        </div>
+</body>
+
+</html>

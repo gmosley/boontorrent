@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+
+<head lang="en">
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+    crossorigin="anonymous">
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.9/css/all.css" integrity="sha384-5SOiIsAziJl6AWe0HWRKTXlfcSHKmYV4RBF18PPJ173Kzn7jzMyFuTtk8JA7QQG1"
+      crossorigin="anonymous"> 
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    html,
+    body,
+    #map {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+    }
+    
+    .statsButton {
+      position:absolute; 
+      right: 0; 
+      bottom: 0; 
+      padding: 0px;
+      margin: 0px;
+      width:20px; 
+      height: 100%;
+    }
+
+  </style>
+  <title>
+    <%= title %>
+  </title>
+  <script>
+    var map;
+    var heatmap;
+    var coords = <%- JSON.stringify(coordinates) %>;
+    var heatmapData = [];    
+
+    function initMap() {
+      map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: 30, lng: 0 },
+        zoom: 2.5,
+        minZoom: 2.5,
+        mapTypeId: "hybrid",
+      });
+
+      heatMap(coords);
+    }
+
+    function heatMap(data) {
+      for (var i = 0; i < heatmapData.length; i++) {
+        heatmapData[i] = (null);
+      }
+      heatmapData = [];
+
+      for (var i = 0; i < data.length; i++) {
+        if (data[i] !== null){
+          if (data[i].lat !== null){
+            var lat = data[i].lat;
+            var lon = data[i].lon;
+            var latLng = new google.maps.LatLng(lat, lon);
+
+            heatmapData.push(latLng);
+          }
+        }
+      }
+
+      heatmap = new google.maps.visualization.HeatmapLayer({
+        data: heatmapData,
+        dissipating: false,
+        map: map
+      });
+    }
+    
+    // modal chart
+    google.charts.load('current', { 'packages': ['corechart'] });
+    google.charts.setOnLoadCallback(drawChart);
+
+    var country_counter = {};
+
+    function drawChart() {
+      var countries_list = makeChartData(coords);
+      //console.log(JSON.stringify(countries_list));
+      var data = google.visualization.arrayToDataTable(countries_list);
+      var height = (countries_list.length - 1) * 40;
+
+      var options = {
+        legend: 'none',
+        title: 'Torrents Resolved per Country',
+        height: data.getNumberOfRows() * 30 + 60,
+        chartArea: {
+          left: '25%',
+          height: data.getNumberOfRows() * 30,
+          width: '70%',
+        },
+      };
+
+      var chart = new google.visualization.BarChart(document.getElementById('bargraph'));
+      chart.draw(data, options);
+    }
+
+    function makeChartData(data) {
+      var maxCount = 0;
+      for (var i = 0; i < data.length; i++) {
+        if (data[i] !== null) {
+            if (data[i].country) {
+              if (!country_counter[data[i].country]) {
+                country_counter[data[i].country] = 0;
+              }
+              country_counter[data[i].country] += 1;
+              if (maxCount < country_counter[data[i].country]) {
+                maxCount = country_counter[data[i].country];
+              }
+            }
+          }
+      }
+
+      var countries_list = [];
+      for (var c in country_counter) {
+        var base_opacity = 0.6;
+        var opacity = base_opacity + (country_counter[c]/maxCount) * (1 - base_opacity);
+        // countries_list.push([c, country_counter[c], 'opacity:' + opacity]);
+        countries_list.push([c, country_counter[c]]);
+      }
+      countries_list.sort(function (a, b) {
+        return b[1] - a[1];
+      });
+
+      if (countries_list.length > 9) {
+        var count = 0;
+        for (let i = 9; i < countries_list.length; i++) {
+          count += countries_list[i][1];
+        }
+        while (countries_list.length > 9) {
+          countries_list.pop();
+        }
+        // countries_list.push(['Others', count, 'opacity:' + base_opacity]);
+        countries_list.push(['Others', count]);
+      }
+
+      // countries_list.unshift(["Country", "Torrents Resolved", {role: 'style'}]);
+      countries_list.unshift(["Country", "Torrents Resolved"]);
+
+      return countries_list;
+    }
+
+    function reMap(){
+      $.getJSON('/reMap', function(data){
+        heatmap.setMap(null);
+        heatMap(data.coordinates);
+        makeChartData(data.coordinates)      
+      });
+      console.log("hi");
+    }
+
+    window.onload = function(){
+      initMap();
+      setInterval(reMap, 120000);
+    }
+    
+  </script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAWU8U34ECkVyzSAXlCUpj7aire06pqY5Q&libraries=visualization"
+    async defer>
+  </script>
+</head>
+
+<body>
+  <% include ../views/public/partials/navbar %>
+
+    <div id="map" style="height:100%; width: calc(100% - 20px);"></div>
+
+    <!-- Button trigger modal -->
+    <button type="button" class="btn btn-warning statsButton rounded-0" data-toggle="modal" data-target="#exampleModalLong">
+      <i id="chevron" class="fas fa-chevron-left" style="color: #343a40"></i>
+    </button>
+
+    <!-- Modal -->
+    <div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+      <div class="modal-dialog" style="width:100%">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLongTitle">Statistics</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div id="bargraph" style="width: 100%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+</body>
+
+</html>
