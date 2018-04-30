@@ -6,7 +6,7 @@
 
 ##### Advisor: Boon Thau Loo
 
-##### CIS Department
+##### First Place in CIS Department
 
 ## Abstract
 
