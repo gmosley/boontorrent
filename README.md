@@ -18,21 +18,16 @@ The main product of BoonTorrent is machine readable time-series data for researc
 
 ## Project Structure
 
-Classification: Some attempts at naieve classification.
-
-indexer-lambda: AWS Lambda that indexes resolved torrents, triggered by s3 object creation events.
-
-torrent-summary-lambda: AWS Lambda that retrieves a given torrent from S3 and decodes the metadata.
-
-prototypes: Prototype implementations.
-
-spark-scala: Local spark processing code.
-
-userdata.sh: Userdata script for EC2 instances.
-
-docs: screenshots and reference material.
-
-app: Proof of concept web applications written with ejs.
+| Location | Description |
+|----------|-------------|
+| [classification](/classification) | Some attempts at naive classification. |
+| [indexer-lambda](/indexer-lambda) | AWS Lambda that indexes resolved torrents, triggered by s3 object creation events. |
+| [torrent-summary-lambda](/torrent-summary-lambda) | AWS Lambda that retrieves a given torrent from S3 and decodes the metadata. |
+| [prototypes](/prototypes) | Prototype implementations. |
+| [spark-scala](/spark-scala) | Local spark processing code. |
+| [userdata.sh](/userdata.sh) | Userdata script for EC2 instances. |
+| [docs](/docs) | screenshots and reference material. |
+| [app](/app) | Proof of concept web applications written with ejs. |
 
 An example firehose log file can be found [here](docs/boonlog-firehose-1-2018-04-30-17-59-50-13ee9501-0921-45ef-a0af-23e9cc13f023).
 
