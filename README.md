@@ -6,7 +6,7 @@
 
 First Place in CIS Department
 
-[David Cao](https://github.com/david-cao) &#9679; [Dylan Mann](https://github.com/dylanmann) &#9679; [Alex Moses](https://github.com/mosesap) &#9679; [Graham Mosley](https://github.com/gmosley)
+[David Cao](https://github.com/david-cao) &#9675; [Dylan Mann](https://github.com/dylanmann) &#9675; [Alex Moses](https://github.com/mosesap) &#9675; [Graham Mosley](https://github.com/gmosley)
 </p>
 
 ## Abstract
