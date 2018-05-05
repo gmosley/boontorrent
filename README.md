@@ -31,6 +31,13 @@ The main product of BoonTorrent is machine readable time-series data for researc
 
 An example firehose log file can be found [here](docs/boonlog-firehose-1-2018-04-30-17-59-50-13ee9501-0921-45ef-a0af-23e9cc13f023).
 
+## Results
+
+Over the period of a month, we crawled and indexed 1.2 million torrents describing 46 million files totaling 4PB.
+
+If you're interested in the raw .torrent files or metadata, please file an issue.
+
+
 ## Screenshots
 
 ![World Map][map1]
