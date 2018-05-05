@@ -1,12 +1,13 @@
-# BoonTorrent, A Real-Time Monitoring Tool for BitTorrent DHT Traffic
+# BoonTorrent
+### A Real-Time Monitoring Tool for BitTorrent DHT Traffic
 
-##### 2018 Penn Senior Design Project
+<p>
+2018 Penn Senior Design Project
 
-##### Team: David Cao, Dylan Mann, Alex Moses, and Graham Mosley
+First Place in CIS Department
 
-##### Advisor: Boon Thau Loo
-
-##### First Place in CIS Department
+[David Cao](https://github.com/david-cao) &#9679; [Dylan Mann](https://github.com/dylanmann) &#9679; [Alex Moses](https://github.com/mosesap) &#9679; [Graham Mosley](https://github.com/gmosley)
+</p>
 
 ## Abstract
 
@@ -20,7 +21,6 @@ The main product of BoonTorrent is machine readable time-series data for researc
 
 | Location | Description |
 |----------|-------------|
-| [classification](/classification) | Some attempts at naive classification. |
 | [indexer-lambda](/indexer-lambda) | AWS Lambda that indexes resolved torrents, triggered by s3 object creation events. |
 | [torrent-summary-lambda](/torrent-summary-lambda) | AWS Lambda that retrieves a given torrent from S3 and decodes the metadata. |
 | [prototypes](/prototypes) | Prototype implementations. |
